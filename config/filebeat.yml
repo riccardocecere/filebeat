@@ -1,0 +1,38 @@
+#filebeat.yml
+
+filebeat.inputs:
+- type: container
+  paths:
+    - /usr/share/filebeat/dockerlogs/data/*/*.log
+
+  processors:
+  - add_docker_metadata:
+      host: "unix:///var/run/docker.sock"
+      match_source_index: 5
+  - drop_event:
+      when:
+        regexp:
+                container.labels.com_docker_swarm_service_name: "bp_h2O|bp-services*"
+  - add_tags:
+      tags: [development]
+      target: "environment"
+
+filebeat.config.modules:
+  path: ${path.config}/modules.d/*.yml
+  reload.enabled: false
+
+output.logstash:
+  hosts: ["10.6.0.187:5044"]
+  #index: filebeat
+
+log files:
+logging.level: error
+logging.to_files: false
+logging.to_syslog: false
+loggins.metrice.enabled: false
+logging.files:
+  path: /var/log/filebeat
+  name: filebeat
+  keepfiles: 7
+  permissions: 0644
+ssl.verification_mode: none
