@@ -5,7 +5,14 @@ version: '3.3'
 services:
 
   filebeat:
-    image: filebeat-root:latest
+    image: bigprofiles.azurecr.io/filebeat:latest
+    volumes:
+      - /data/docker/containers:/usr/share/filebeat/dockerlogs/data
+      - /var/run/docker.sock:/var/run/docker.sock
+      - filebeat-data:/usr/share/filebeat/data
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT}
+      HOSTNAME: ${HOSTNAME}
     configs:
       - source: filebeat_config
         target: /usr/share/filebeat/filebeat.yml
@@ -14,14 +21,10 @@ services:
     deploy:
       mode: replicated
       replicas: 1
-    volumes:
-      - /data/docker/containers:/usr/share/filebeat/dockerlogs/data
-      - /var/run/docker.sock:/var/run/docker.sock
-      - filebeat-data:/usr/share/filebeat/data
 
 configs:
   filebeat_config:
-    file: ./config/filebeat.yml
+    file: ./filebeat.yml
 
 networks:
   beat:
